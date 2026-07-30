@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Link Shortener | Premium Access</title>
+  <link rel="preconnect" href="https://www.highperformanceformat.com">
+  <link rel="preconnect" href="https://pl30604520.effectivecpmnetwork.com">
+  <link rel="dns-prefetch" href="https://www.highperformanceformat.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg1: #0a0a0f;
+      --bg2: #1a1a2e;
+      --glass: rgba(255, 255, 255, 0.06);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --accent: #7c5cfc;
+      --accent2: #00d4ff;
+      --text: #e8e8f0;
+      --muted: #9a9ab0;
+      --success: #00e676;
+      --danger: #ff5252;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 50%, #16213e 100%);
+      min-height: 100vh;
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ========== PROGRESS BAR ========== */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), #ff6b9d);
+      z-index: 9999;
+      transition: width 0.1s linear;
+      box-shadow: 0 0 12px rgba(124, 92, 252, 0.6);
+    }
+
+    /* ========== ADMIN PAGE ========== */
+    #admin-page {
+      display: none;
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+
+    #admin-page.active { display: block; }
+
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 32px 28px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-group input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #5a3fd6);
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(124, 92, 252, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(124, 92, 252, 0.55);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid var(--glass-border);
+      margin-top: 10px;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .result-box {
+      display: none;
+      margin-top: 24px;
+      padding: 18px;
+      background: rgba(0, 230, 118, 0.08);
+      border: 1px solid rgba(0, 230, 118, 0.25);
+      border-radius: 14px;
+    }
+
+    .result-box.show { display: block; }
+
+    .result-box .short-url {
+      word-break: break-all;
+      font-size: 0.9rem;
+      color: var(--success);
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .qr-wrap {
+      text-align: center;
+      margin: 14px 0;
+    }
+
+    .qr-wrap img {
+      border-radius: 10px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .stat-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .stat-card .num {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-card .label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ========== FLOW PAGE ========== */
+    #flow-page {
+      display: none;
+      padding-bottom: 40px;
+      min-height: 100vh;
+    }
+
+    #flow-page.active { display: block; }
+
+    .ad-label {
+      text-align: center;
+      font-size: 0.65rem;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .ad-top-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 16px 10px 8px;
+      margin-top: 4px;
+    }
+
+    .ad-container {
+      position: relative;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 8px;
+      overflow: hidden;
+      min-height: 50px;
+    }
+
+    #ad-top {
+      width: 300px;
+      height: 250px;
+    }
+
+    #ad-bottom {
+      width: 728px;
+      max-width: 100%;
+      height: 90px;
+    }
+
+    .ad-bottom-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 12px 10px 20px;
+      overflow-x: auto;
+    }
+
+    /* Mobile scale for 728x90 */
+    @media (max-width: 760px) {
+      #ad-bottom {
+        transform: scale(0.92);
+        transform-origin: top center;
+      }
+      .ad-bottom-wrap {
+        padding-bottom: 10px;
+      }
+    }
+
+    @media (max-width: 680px) {
+      #ad-bottom {
+        transform: scale(0.78);
+      }
+    }
+
+    @media (max-width: 560px) {
+      #ad-bottom {
+        transform: scale(0.62);
+      }
+    }
+
+    @media (max-width: 440px) {
+      #ad-bottom {
+        transform: scale(0.52);
+      }
+    }
+
+    /* Click overlay */
+    .click-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .click-overlay.hidden {
+      display: none;
+    }
+
+    /* Center content */
+    .center-zone {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 10px 20px 16px;
+      text-align: center;
+    }
+
+    .page-indicator {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .page-indicator span {
+      color: var(--accent2);
+      font-weight: 600;
+    }
+
+    /* Circular timer */
+    .timer-wrap {
+      position: relative;
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 16px;
+    }
+
+    .timer-wrap svg {
+      transform: rotate(-90deg);
+      width: 110px;
+      height: 110px;
+    }
+
+    .timer-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 6;
+    }
+
+    .timer-progress {
+      fill: none;
+      stroke: url(#timerGrad);
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 301.6;
+      stroke-dashoffset: 301.6;
+      transition: stroke-dashoffset 0.1s linear;
+    }
+
+    .timer-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .status-text {
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 8px;
+      min-height: 28px;
+      font-weight: 500;
+    }
+
+    .click-counter {
+      font-size: 0.85rem;
+      color: var(--accent2);
+      margin-bottom: 14px;
+      min-height: 22px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .click-counter.show { display: block; }
+
+    #get-access-btn {
+      display: none;
+      margin-top: 8px;
+      max-width: 280px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #get-access-btn.show { display: inline-flex; }
+
+    /* Shimmer loader for ads */
+    .shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      z-index: 1;
+      pointer-events: none;
+      border-radius: 8px;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .ad-container.loaded .shimmer {
+      display: none;
+    }
+
+    /* Error state */
+    .error-box {
+      max-width: 400px;
+      margin: 80px auto;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .error-box h2 {
+      color: var(--danger);
+      margin-bottom: 12px;
+    }
+
+    /* Social bar placeholder area */
+    #social-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="progress-bar"></div>
+
+  <!-- ==================== ADMIN / CREATOR ==================== -->
+  <div id="admin-page">
+    <div class="glass-card">
+      <div class="logo">
+        <h1>⚡ ShortLink Pro</h1>
+        <p>Premium link shortener with smart access</p>
+      </div>
+
+      <div class="input-group">
+        <label for="main-link">Enter Main Link</label>
+        <input type="url" id="main-link" placeholder="https://example.com/your-page" autocomplete="off">
+      </div>
+
+      <button class="btn btn-primary" id="create-btn" onclick="createShortLink()">
+        Create Short Link
+      </button>
+
+      <div class="result-box" id="result-box">
+        <div class="short-url" id="short-url-text"></div>
+        <button class="btn btn-secondary" onclick="copyShortLink()">📋 Copy Link</button>
+        <div class="qr-wrap" id="qr-wrap"></div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="num" id="stat-links">0</div>
+        <div class="label">Links Created</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" id="stat-clicks">0</div>
+        <div class="label">Total Clicks</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== INTERSTITIAL FLOW ==================== -->
+  <div id="flow-page">
+    <!-- Top Ad 300x250 -->
+    <div class="ad-top-wrap">
+      <div>
+        <div class="ad-label">ADVERTISEMENT</div>
+        <div class="ad-container" id="ad-top">
+          <div class="shimmer"></div>
+          <div class="click-overlay" id="overlay-top"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center Zone -->
+    <div class="center-zone">
+      <div class="page-indicator">Page <span id="page-num">1</span> / 3</div>
+
+      <div class="timer-wrap">
+        <svg viewBox="0 0 110 110">
+          <defs>
+            <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#7c5cfc"/>
+              <stop offset="100%" stop-color="#00d4ff"/>
+            </linearGradient>
+          </defs>
+          <circle class="timer-bg" cx="55" cy="55" r="48"></circle>
+          <circle class="timer-progress" id="timer-circle" cx="55" cy="55" r="48"></circle>
+        </svg>
+        <div class="timer-text" id="timer-text">6</div>
+      </div>
+
+      <div class="status-text" id="status-text">Please wait...</div>
+      <div class="click-counter" id="click-counter"></div>
+
+      <button class="btn btn-primary" id="get-access-btn" onclick="handleGetAccess()">
+        Get Access
+      </button>
+    </div>
+
+    <!-- Bottom Ad 728x90 -->
+    <div class="ad-bottom-wrap">
+      <div>
+        <div class="ad-label">ADVERTISEMENT</div>
+        <div class="ad-container" id="ad-bottom">
+          <div class="shimmer"></div>
+          <div class="click-overlay" id="overlay-bottom"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="social-bar"></div>
+
+  <script>
+    // ==================== CONSTANTS ====================
+    const AD_TOP_KEY = 'fe5425c87d33c6441e36242e1aa8281b';
+    const AD_BOTTOM_KEY = '4c342efed49c6f38506bdcbbb7ecee4a';
+    const SMARTLINK = 'https://www.effectivecpmnetwork.com/v390gi5k?key=a634a3f6a0067c14cb621dc5e47b5aec';
+    const SOCIAL_BAR_SRC = 'https://pl30604520.effectivecpmnetwork.com/c6/98/6f/c6986f1308525aeb043ac559070a08c6.js';
+
+    const PAGE_TIMERS = [6, 4, 3]; // seconds for page 1,2,3
+    const CIRCUMFERENCE = 2 * Math.PI * 48; // ~301.6
+
+    // ==================== STATE ====================
+    let mainLink = '';
+    let currentPage = 1;
+    let timerInterval = null;
+    let remainingTime = 0;
+    let isPaused = false;
+    let clicksNeededOnPage = 0;
+    let clicksDoneOnPage = 0;
+    let totalClicksRequired = 0;
+    let clickPages = []; // array of page numbers that need clicks
+    let isSmartlinkUser = false;
+    let smartlinkUsed = false;
+    let assignmentDone = false;
+
+    // ==================== AD LOADER (isolated - exact official format) ====================
+    function handleOverlayClick(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (clicksNeededOnPage <= 0 || clicksDoneOnPage >= clicksNeededOnPage) return;
+
+      clicksDoneOnPage++;
+      updateClickUI();
+
+      // Hide overlay briefly so real ad click can go through
+      const ov = e.currentTarget;
+      ov.classList.add('hidden');
+      setTimeout(function() {
+        if (clicksDoneOnPage < clicksNeededOnPage) {
+          ov.classList.remove('hidden');
+        }
+      }, 500);
+
+      if (clicksDoneOnPage >= clicksNeededOnPage) {
+        isPaused = false;
+        document.getElementById('status-text').textContent = 'Thanks! Continuing...';
+        document.getElementById('click-counter').classList.remove('show');
+        // Hide both overlays
+        const t = document.getElementById('overlay-top');
+        const b = document.getElementById('overlay-bottom');
+        if (t) t.classList.add('hidden');
+        if (b) b.classList.add('hidden');
+        startTimerCountdown();
+      }
+    }
+
+    function addClickOverlay(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      // Remove any existing overlay
+      const old = container.querySelector('.click-overlay');
+      if (old) old.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'click-overlay';
+      overlay.id = (containerId === 'ad-top') ? 'overlay-top' : 'overlay-bottom';
+      // Start hidden if no clicks needed on this page
+      if (clicksNeededOnPage <= 0) {
+        overlay.classList.add('hidden');
+      }
+      overlay.onclick = handleOverlayClick;
+      container.appendChild(overlay);
+    }
+
+    function loadAd(key, width, height, containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      // Completely clear container (important for these ad networks)
+      container.innerHTML = '';
+      container.classList.remove('loaded');
+
+      // Shimmer loader
+      const shimmer = document.createElement('div');
+      shimmer.className = 'shimmer';
+      container.appendChild(shimmer);
+
+      // ===== EXACT official ad code style (this is critical) =====
+      const conf = document.createElement('script');
+      conf.type = 'text/javascript';
+      conf.text = `atOptions = {
+        'key' : '${key}',
+        'format' : 'iframe',
+        'height' : ${height},
+        'width' : ${width},
+        'params' : {}
+      };`;
+      container.appendChild(conf);
+
+      const inv = document.createElement('script');
+      inv.type = 'text/javascript';
+      inv.src = 'https://www.highperformanceformat.com/' + key + '/invoke.js';
+      // Do NOT use async=true — must execute in order after atOptions
+      inv.onload = function() {
+        container.classList.add('loaded');
+        // Add overlay AFTER ad has loaded
+        addClickOverlay(containerId);
+      };
+      inv.onerror = function() {
+        container.classList.add('loaded');
+        addClickOverlay(containerId);
+      };
+      container.appendChild(inv);
+    }
+
+    function loadBothAds() {
+      // Load top first, then bottom after 350ms to avoid atOptions overwrite race
+      loadAd(AD_TOP_KEY, 300, 250, 'ad-top');
+      setTimeout(function() {
+        loadAd(AD_BOTTOM_KEY, 728, 90, 'ad-bottom');
+      }, 350);
+    }
+
+    // ==================== SOCIAL BAR (50% chance) ====================
+    function maybeLoadSocialBar() {
+      if (Math.random() < 0.5) {
+        const s = document.createElement('script');
+        s.src = SOCIAL_BAR_SRC;
+        s.async = true;
+        document.getElementById('social-bar').appendChild(s);
+      }
+    }
+
+    // ==================== ASSIGNMENT (sessionStorage) ====================
+    function assignUserGroup() {
+      if (sessionStorage.getItem('ls_assigned') === '1') {
+        // Restore
+        totalClicksRequired = parseInt(sessionStorage.getItem('ls_clicksReq') || '0', 10);
+        clickPages = JSON.parse(sessionStorage.getItem('ls_clickPages') || '[]');
+        isSmartlinkUser = sessionStorage.getItem('ls_smart') === '1';
+        smartlinkUsed = sessionStorage.getItem('ls_smartUsed') === '1';
+        assignmentDone = true;
+        return;
+      }
+
+      const r = Math.random();
+      let req = 0;
+      let pages = [];
+
+      if (r < 0.04) {
+        // 4% → 2 clicks
+        req = 2;
+        // pick 2 distinct random pages from 1,2,3
+        const pool = [1, 2, 3];
+        const p1 = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+        const p2 = pool[Math.floor(Math.random() * pool.length)];
+        pages = [p1, p2].sort();
+      } else if (r < 0.10) {
+        // 6% → 1 click
+        req = 1;
+        pages = [Math.floor(Math.random() * 3) + 1];
+      } else {
+        // 90% free
+        req = 0;
+        pages = [];
+      }
+
+      // Smartlink 35%
+      const smart = Math.random() < 0.35;
+
+      sessionStorage.setItem('ls_assigned', '1');
+      sessionStorage.setItem('ls_clicksReq', String(req));
+      sessionStorage.setItem('ls_clickPages', JSON.stringify(pages));
+      sessionStorage.setItem('ls_smart', smart ? '1' : '0');
+      sessionStorage.setItem('ls_smartUsed', '0');
+
+      totalClicksRequired = req;
+      clickPages = pages;
+      isSmartlinkUser = smart;
+      smartlinkUsed = false;
+      assignmentDone = true;
+    }
+
+    // ==================== CLICK ENFORCEMENT ====================
+    function updateClickUI() {
+      const el = document.getElementById('click-counter');
+      el.textContent = 'Continue karva mate ad par click karo (' + clicksDoneOnPage + '/' + clicksNeededOnPage + ')';
+      el.classList.add('show');
+    }
+
+    function checkIfPageNeedsClicks() {
+      clicksNeededOnPage = clickPages.filter(p => p === currentPage).length;
+      clicksDoneOnPage = 0;
+
+      const topOv = document.getElementById('overlay-top');
+      const botOv = document.getElementById('overlay-bottom');
+
+      if (clicksNeededOnPage > 0) {
+        isPaused = true;
+        if (topOv) topOv.classList.remove('hidden');
+        if (botOv) botOv.classList.remove('hidden');
+        document.getElementById('status-text').textContent = 'Please interact with the ads';
+        updateClickUI();
+      } else {
+        isPaused = false;
+        if (topOv) topOv.classList.add('hidden');
+        if (botOv) botOv.classList.add('hidden');
+        document.getElementById('click-counter').classList.remove('show');
+      }
+    }
+
+    // ==================== TIMER & PROGRESS ====================
+    function setProgressBar(pct) {
+      document.getElementById('progress-bar').style.width = Math.min(100, Math.max(0, pct)) + '%';
+    }
+
+    function setCircularTimer(sec, totalSec) {
+      const offset = CIRCUMFERENCE * (1 - (sec / totalSec));
+      document.getElementById('timer-circle').style.strokeDashoffset = offset;
+      document.getElementById('timer-text').textContent = Math.ceil(sec);
+    }
+
+    function startTimerCountdown() {
+      if (timerInterval) clearInterval(timerInterval);
+
+      const total = PAGE_TIMERS[currentPage - 1];
+      if (remainingTime <= 0) remainingTime = total;
+
+      const startTs = Date.now();
+      const initialRemain = remainingTime;
+
+      timerInterval = setInterval(function() {
+        if (isPaused) return;
+
+        const elapsed = (Date.now() - startTs) / 1000;
+        remainingTime = Math.max(0, initialRemain - elapsed);
+
+        setCircularTimer(remainingTime, total);
+
+        // Overall progress across 3 pages (approx)
+        const pageBase = ((currentPage - 1) / 3) * 100;
+        const pagePct = ((total - remainingTime) / total) * (100 / 3);
+        setProgressBar(pageBase + pagePct);
+
+        if (remainingTime <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          onPageTimerComplete();
+        }
+      }, 50);
+    }
+
+    function onPageTimerComplete() {
+      if (currentPage < 3) {
+        goToPage(currentPage + 1);
+      } else {
+        // Page 3 done → show button
+        document.getElementById('status-text').textContent = 'Ready! Click below to continue';
+        document.getElementById('get-access-btn').classList.add('show');
+        document.getElementById('timer-text').textContent = '✓';
+        setProgressBar(100);
+      }
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      remainingTime = PAGE_TIMERS[page - 1];
+      document.getElementById('page-num').textContent = page;
+      document.getElementById('get-access-btn').classList.remove('show');
+      document.getElementById('status-text').textContent = 'Please wait...';
+
+      // Refresh ads on every page entry
+      loadBothAds();
+
+      // Maybe social bar again? (user said on each page load 50%)
+      // Clear previous social and maybe reload
+      document.getElementById('social-bar').innerHTML = '';
+      maybeLoadSocialBar();
+
+      checkIfPageNeedsClicks();
+
+      if (!isPaused) {
+        startTimerCountdown();
+      } else {
+        // Show full circle while waiting for clicks
+        setCircularTimer(remainingTime, PAGE_TIMERS[page - 1]);
+      }
+    }
+
+    // ==================== GET ACCESS / SMARTLINK ====================
+    function handleGetAccess() {
+      if (isSmartlinkUser && !smartlinkUsed) {
+        smartlinkUsed = true;
+        sessionStorage.setItem('ls_smartUsed', '1');
+        window.open(SMARTLINK, '_blank');
+        document.getElementById('get-access-btn').textContent = 'Continue to Main Link';
+        return;
+      }
+      // Redirect to main
+      window.location.href = mainLink;
+    }
+
+    // ==================== ADMIN LOGIC ====================
+    function createShortLink() {
+      const input = document.getElementById('main-link');
+      const url = (input.value || '').trim();
+      if (!url) {
+        alert('Please enter a valid URL');
+        return;
+      }
+      try {
+        new URL(url); // basic validation
+      } catch (e) {
+        alert('Please enter a valid URL (include https://)');
+        return;
+      }
+
+      const encoded = btoa(unescape(encodeURIComponent(url)));
+      const short = window.location.origin + window.location.pathname + '?s=' + encoded;
+
+      document.getElementById('short-url-text').textContent = short;
+      document.getElementById('result-box').classList.add('show');
+
+      // QR
+      const qr = document.getElementById('qr-wrap');
+      qr.innerHTML = '<img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=' + encodeURIComponent(short) + '" alt="QR Code" width="140" height="140">';
+
+      // Stats
+      let total = parseInt(localStorage.getItem('ls_totalLinks') || '0', 10);
+      total++;
+      localStorage.setItem('ls_totalLinks', String(total));
+      document.getElementById('stat-links').textContent = total;
+
+      window._lastShort = short;
+    }
+
+    function copyShortLink() {
+      const text = window._lastShort || document.getElementById('short-url-text').textContent;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+          alert('Copied to clipboard!');
+        });
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        alert('Copied!');
+      }
+    }
+
+    function loadAdminStats() {
+      document.getElementById('stat-links').textContent = localStorage.getItem('ls_totalLinks') || '0';
+      document.getElementById('stat-clicks').textContent = localStorage.getItem('ls_totalClicks') || '0';
+    }
+
+    // ==================== INIT ====================
+    function init() {
+      const params = new URLSearchParams(window.location.search);
+      const s = params.get('s');
+
+      if (!s) {
+        // Admin
+        document.getElementById('admin-page').classList.add('active');
+        loadAdminStats();
+        return;
+      }
+
+      // Decode
+      try {
+        mainLink = decodeURIComponent(escape(atob(s)));
+        // basic sanity
+        if (!mainLink || (!mainLink.startsWith('http://') && !mainLink.startsWith('https://'))) {
+          throw new Error('Invalid');
+        }
+      } catch (e) {
+        document.body.innerHTML = '<div class="error-box glass-card"><h2>Invalid Link</h2><p style="color:var(--muted)">This short link is broken or expired.</p></div>';
+        return;
+      }
+
+      // Increment click count
+      let clicks = parseInt(localStorage.getItem('ls_totalClicks') || '0', 10);
+      clicks++;
+      localStorage.setItem('ls_totalClicks', String(clicks));
+
+      // Show flow
+      document.getElementById('flow-page').classList.add('active');
+
+      assignUserGroup();
+
+      // Start page 1
+      loadBothAds();
+      maybeLoadSocialBar();
+      goToPage(1);
+    }
+
+    // Kick off
+    init();
+  </script>
+</body>
+</html>
